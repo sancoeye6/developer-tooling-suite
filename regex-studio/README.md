@@ -1,4 +1,4 @@
-# Regex Studio v3.6 — Intelligent Data Parsing Engine
+# Regex Studio v3.7 — Intelligent Data Parsing Engine
 
 Regex Studio is a specialized offline ETL tool designed to clean, normalize, and structure unstructured HTML, MHTML, and text data for ingestion into analysis systems and Retrieval-Augmented Generation (RAG) pipelines.
 

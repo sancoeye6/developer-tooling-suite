@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RegexStudio V3.7 - Smart Name</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #131838;
+            --bg-card: rgba(30, 41, 82, 0.6);
+            --accent-primary: #00d4ff;
+            --accent-secondary: #7c3aed;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b 0%, var(--bg-primary) 100%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            padding: 15px 20px;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand h1 { margin: 0; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px; }
+
+        /* Safety Panel */
+        .safety-panel {
+            display: flex; gap: 8px; align-items: center;
+            background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: var(--radius-sm);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .light-group { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .light-dot { width: 6px; height: 6px; border-radius: 50%; background: #334155; transition: 0.3s; }
+        .light-label { font-size: 0.5rem; color: var(--text-secondary); font-weight: 600; }
+        .light-dot.safe { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .light-dot.unsafe { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+
+        /* --- METRICS & TOOLBAR --- */
+        .metrics-grid {
+            display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; padding: 10px 20px;
+            background: rgba(10, 14, 39, 0.6); border-bottom: 1px solid rgba(255,255,255,0.05);
+            align-items: center;
+        }
+        .metric-item { display:flex; flex-direction:column; }
+        .metric-label { font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 2px; }
+        .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: white; }
+
+        .toolbar-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-secondary); font-size: 0.75rem; padding: 6px 10px; border-radius: 6px;
+            cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px;
+        }
+        
+        /* --- CONTENT --- */
+        .app-content { flex: 1; padding: 20px; padding-bottom: 140px; max-width: 600px; margin: 0 auto; width: 100%; }
+
+        .upload-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 2px dashed rgba(255,255,255,0.15); border-radius: var(--radius-lg); padding: 25px;
+            text-align: center; cursor: pointer; transition: 0.2s; margin-bottom: 20px;
+        }
+        .upload-card:active { transform: scale(0.98); border-color: var(--accent-primary); }
+        .upload-icon { font-size: 1.8rem; margin-bottom: 8px; }
+
+        /* --- FILE LIST --- */
+        .file-list { display: flex; flex-direction: column; gap: 10px; }
+        
+        .file-card {
+            background: rgba(30, 41, 82, 0.4); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-md); padding: 12px; 
+            display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
+            transition: opacity 0.2s;
+        }
+        .file-card.inactive { opacity: 0.5; filter: grayscale(0.5); }
+
+        .file-checkbox {
+            appearance: none; background-color: rgba(255, 255, 255, 0.1); margin: 0; font: inherit;
+            color: var(--accent-primary); width: 22px; height: 22px; border: 2px solid var(--text-secondary);
+            border-radius: 6px; display: grid; place-content: center; cursor: pointer; transition: 0.2s;
+        }
+        .file-checkbox::before {
+            content: ""; width: 10px; height: 10px; transform: scale(0); transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em var(--bg-primary); background-color: var(--bg-primary);
+            transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .file-checkbox:checked { background-color: var(--accent-primary); border-color: var(--accent-primary); }
+        .file-checkbox:checked::before { transform: scale(1); }
+
+        .file-info { min-width: 0; }
+        .file-name { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+        
+        .file-badges { display: flex; gap: 6px; }
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+        .badge-gem { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+        .badge-cla { background: rgba(251, 146, 60, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
+        .badge-gpt { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; border: 1px solid rgba(20, 184, 166, 0.3); }
+        .badge-li  { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .badge-raw { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+        .icon-btn { background: rgba(255,255,255,0.05); border: none; color: var(--text-secondary); width: 34px; height: 34px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+        .btn-del { color: #f87171; }
+
+        /* --- FOOTER --- */
+        .mobile-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(10, 14, 39, 0.95); backdrop-filter: blur(20px);
+            padding: 15px 20px 25px 20px; border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; gap: 10px; z-index: 100; box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+        .footer-row { display: flex; gap: 8px; width: 100%; }
+        
+        .btn { flex: 1; padding: 14px; border: none; border-radius: var(--radius-md); font-weight: 700; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn:active { transform: scale(0.96); }
+        .btn-rag { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        .btn-pdf { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .btn-txt { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-sm { padding: 10px; font-size: 0.8rem; background: rgba(255,255,255,0.05); color: var(--text-secondary); }
+        .btn-clr { flex: 0 0 50px; background: transparent; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* --- MODAL --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; backdrop-filter: blur(5px); justify-content: center; align-items: center; }
+        .modal-card { background: #1e293b; width: 90%; max-width: 400px; border-radius: var(--radius-lg); padding: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; height: 70vh; animation: slideUp 0.3s ease; }
+        input.edit-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: var(--radius-sm); color: white; margin-bottom: 10px; font-size: 1rem; width: 100%; }
+        textarea { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); color: var(--text-primary); padding: 10px; font-family: 'JetBrains Mono', monospace; resize: none; margin-bottom: 15px; width: 100%; }
+
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 10px 20px; border-radius: 30px; font-weight: 600; opacity: 0; transition: 0.3s; z-index: 300; pointer-events: none; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .hidden { display: none !important; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <h1>RegexStudio</h1>
+            <div class="subtitle">V3.7 Smart Name</div>
+        </div>
+        <div class="safety-panel hidden" id="safetyPanel">
+            <div class="light-group"><div class="light-dot" id="ledGpt"></div><div class="light-label">GPT</div></div>
+            <div class="light-group"><div class="light-dot" id="ledClaude"></div><div class="light-label">CLA</div></div>
+            <div class="light-group"><div class="light-dot" id="ledGemini"></div><div class="light-label">GEM</div></div>
+        </div>
+    </header>
+
+    <div id="metricsBar" class="metrics-grid hidden">
+        <div class="metric-item"><div class="metric-label">Active Load</div><div class="metric-val" id="tokenCount">0k</div></div>
+        <div class="metric-item"><div class="metric-label">Selected</div><div class="metric-val" id="fileCount">0</div></div>
+        <button class="toolbar-btn" onclick="toggleSort()" id="btnSort">
+            <span id="sortIcon">⬇️</span> Size
+        </button>
+    </div>
+
+    <div class="app-content">
+        <div class="upload-card" id="dropZone">
+            <div class="upload-icon">📂</div>
+            <div style="font-weight:600;">Tap to Add Files</div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 5px;">MHTML • PDF • TXT</div>
+        </div>
+        <input type="file" id="fileInput" accept=".mhtml,.mht,.html,.htm,.txt" multiple class="hidden">
+        <div class="file-list" id="fileList"></div>
+    </div>
+
+    <div class="mobile-footer hidden" id="footer">
+        <div class="footer-row">
+            <button class="btn btn-sm" onclick="toggleAll(true)">All</button>
+            <button class="btn btn-sm" onclick="toggleAll(false)">None</button>
+            <button class="btn btn-clr" onclick="clearAll()">🗑️</button>
+        </div>
+        <div class="footer-row">
+            <button class="btn btn-txt" onclick="downloadBundle('txt')">TXT</button>
+            <button class="btn btn-pdf" onclick="downloadBundle('pdf')">PDF</button>
+            <button class="btn btn-rag" onclick="downloadBundle('rag')">RAG</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editorOverlay">
+        <div class="modal-card">
+            <div style="color:white; font-weight:700; margin-bottom:10px;">✏️ Edit File</div>
+            <input type="text" id="editNameInput" class="edit-input">
+            <textarea id="editorText"></textarea>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-txt" onclick="closeEditor()">Cancel</button>
+                <button class="btn btn-rag" onclick="saveEditor()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">✅ Success</div>
+
+<script>
+    let sessionData = [];
+    let currentEditId = null;
+    let sortDirection = 'desc';
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => processFiles(e.target.files));
+
+    // --- CORE LOGIC ---
+    async function processFiles(files) {
+        if (!files.length) return;
+        document.getElementById('metricsBar').classList.remove('hidden');
+        document.getElementById('safetyPanel').classList.remove('hidden');
+        document.getElementById('footer').classList.remove('hidden');
+        showToast('Processing...');
+
+        for (const file of files) {
+            try {
+                const raw = await readFile(file);
+                const processed = smartParse(raw, file.name, file.lastModified);
+                sessionData.push({
+                    id: Date.now() + Math.random(),
+                    name: processed.title,
+                    type: processed.type,
+                    content: processed.text,
+                    date: processed.date,
+                    tokens: Math.ceil(processed.text.length / 4),
+                    active: true
+                });
+            } catch (e) { console.error(e); }
+        }
+        applySort();
+        renderList();
+        showToast(`Added ${files.length} files`);
+    }
+
+    // --- SORTING ---
+    function toggleSort() {
+        sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+        document.getElementById('sortIcon').innerText = sortDirection === 'desc' ? '⬇️' : '⬆️';
+        applySort();
+        renderList();
+    }
+
+    function applySort() {
+        sessionData.sort((a, b) => {
+            return sortDirection === 'desc' 
+                ? b.tokens - a.tokens 
+                : a.tokens - b.tokens;
+        });
+    }
+
+    // --- SELECTION ---
+    function toggleFile(id) {
+        const f = sessionData.find(x => x.id === id);
+        if (f) {
+            f.active = !f.active;
+            renderList();
+        }
+    }
+
+    function toggleAll(state) {
+        sessionData.forEach(f => f.active = state);
+        renderList();
+    }
+
+    // --- RENDER ---
+    function renderList() {
+        const list = document.getElementById('fileList');
+        list.innerHTML = '';
+        
+        let activeTokens = 0;
+        let activeCount = 0;
+
+        sessionData.forEach(f => {
+            if(f.active) {
+                activeTokens += f.tokens;
+                activeCount++;
+            }
+
+            let badge = 'badge-raw';
+            if(f.type==='GEMINI') badge='badge-gem';
+            if(f.type==='CLAUDE') badge='badge-cla';
+            if(f.type==='GPT') badge='badge-gpt';
+            if(f.type==='LINKEDIN') badge='badge-li';
+
+            const div = document.createElement('div');
+            div.className = `file-card ${f.active ? '' : 'inactive'}`;
+            div.innerHTML = `
+                <input type="checkbox" class="file-checkbox" 
+                    ${f.active ? 'checked' : ''} 
+                    onchange="toggleFile(${f.id})">
+                
+                <div class="file-info">
+                    <div class="file-name" onclick="renameFile(${f.id})">${f.name}</div>
+                    <div class="file-badges">
+                        <span class="badge ${badge}">${f.type}</span>
+                        <span class="badge badge-raw">${f.date}</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+                     <span style="font-size:0.75rem; font-weight:700; color:#94a3b8;">${(f.tokens/1000).toFixed(1)}k</span>
+                     <div class="action-group">
+                        <button class="icon-btn" onclick="renameFile(${f.id})">✏️</button>
+                        <button class="icon-btn btn-del" onclick="removeFile(${f.id})">🗑️</button>
+                    </div>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+
+        document.getElementById('tokenCount').innerText = (activeTokens/1000).toFixed(1) + 'k';
+        document.getElementById('fileCount').innerText = activeCount;
+        updateSafetyLights(activeTokens);
+    }
+
+    function updateSafetyLights(t) {
+        const g = document.getElementById('ledGpt');
+        const c = document.getElementById('ledClaude');
+        const m = document.getElementById('ledGemini');
+        [g,c,m].forEach(x => x.className = 'light-dot');
+        
+        if(t < 120000) g.classList.add('safe'); else g.classList.add('unsafe');
+        if(t < 190000) c.classList.add('safe'); else c.classList.add('unsafe');
+        m.classList.add('safe'); 
+    }
+
+    // --- PARSING ENGINE V3.7 (Fixed Username) ---
+    function smartParse(raw, filename, ts) {
+        let type = "RAW", text = "", title = filename, date = new Date(ts).toISOString().split('T')[0];
+
+        // 1. LINKEDIN
+        if (raw.includes('linkedin.com') || raw.includes('data-view-name="feed-commentary"') || raw.includes('com.linkedin.voyager')) {
+            type = "LINKEDIN";
+            const doc = new DOMParser().parseFromString(raw, 'text/html');
+            const posts = [];
+            const selectors = '[data-view-name="feed-commentary"], .feed-shared-update-v2__description-wrapper, .break-words, .feed-shared-text';
+            doc.querySelectorAll(selectors).forEach(n => {
+                n.querySelectorAll('button, .visually-hidden').forEach(x => x.remove());
+                let t = n.innerText.replace(/…see more/g, '').replace(/\n\s+\n/g, '\n').trim();
+                if (t.length > 15 && !posts.includes(t) && !t.includes("View full post")) posts.push(t);
+            });
+            if (posts.length === 0) {
+                const jsonRegex = /"text"\s*:\s*"((?:[^"\\]|\\.)*)"/g;
+                let match;
+                while ((match = jsonRegex.exec(raw)) !== null) {
+                    let clean = match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+                    if (clean.length > 20 && !posts.includes(clean) && !clean.includes("textDirection")) posts.push(clean);
+                }
+            }
+            if (posts.length > 0) {
+                text = posts.join('\n\n---\n\n');
+                title = filename.replace(/\.(txt|html|pdf)$/i, '') + " (Post)";
+            } else text = "[LinkedIn detected, but no text content found.]";
+        }
+        // 2. Chat/MHTML
+        else if (raw.includes('Subject: ') || raw.match(/boundary="(.+?)"/)) {
+            type = "MHTML";
+            const dM = raw.match(/^Date: (.+)$/m); if(dM) date = new Date(dM[1]).toISOString().split('T')[0];
+            const sM = raw.match(/^Subject: (.+)$/m); if(sM) title = sM[1].trim();
+            let htmlRaw = "";
+            const b = raw.match(/boundary="(.+?)"/);
+            if(b) {
+                const p = raw.split(b[1]).find(x => x.includes('Content-Type: text/html'));
+                if(p) htmlRaw = p.replace(/=\r?\n/g,'').replace(/=3D/g,'=');
+            } else if (raw.includes('<html')) {
+                htmlRaw = raw.substring(raw.indexOf('<html')).replace(/=\r?\n/g,'').replace(/=3D/g,'=');
+            }
+            if(htmlRaw) {
+                const doc = new DOMParser().parseFromString(htmlRaw, 'text/html');
+                const nodes = doc.querySelectorAll('user-query-content, message-content, [data-testid="user-message"], .font-claude-response, [data-message-author-role]');
+                if(nodes.length > 0) {
+                    let conv = [];
+                    const tNode = doc.querySelector('.conversation-title');
+                    if(tNode && tNode.innerText.trim()) title = tNode.innerText.trim();
+                    else {
+                        const firstP = doc.querySelector('user-query-content, [data-message-author-role="user"]');
+                        if((title.toLowerCase().includes('gemini') || title.toLowerCase().includes('chatgpt')) && firstP) title = firstP.innerText.slice(0, 30) + "...";
+                    }
+                    nodes.forEach(n => {
+                        let role = "UNKNOWN";
+                        const tag = n.tagName.toLowerCase();
+                        // --- CHANGED 'SANCO' to 'You' ---
+                        if(tag === 'user-query-content') { role="You"; type="GEMINI"; }
+                        else if(tag === 'message-content') { role="GEMINI"; type="GEMINI"; }
+                        else if(n.getAttribute('data-testid') === 'user-message') { role="You"; type="CLAUDE"; }
+                        else if(n.className.includes('font-claude-response')) { role="CLAUDE"; type="CLAUDE"; }
+                        else if(n.getAttribute('data-message-author-role') === 'user') { role="You"; type="GPT"; }
+                        else if(n.getAttribute('data-message-author-role') === 'assistant') { role="GPT"; type="GPT"; }
+                        n.querySelectorAll('pre, code').forEach(c => c.innerHTML = `\n[CODE]\n${c.innerText}\n[/CODE]\n`);
+                        n.querySelectorAll('svg, button, .mat-icon').forEach(x => x.remove());
+                        let c = n.innerText.trim();
+                        if(c.length > 1) conv.push(`\n**${role}:**\n${c}`);
+                    });
+                    text = [...new Set(conv)].join('\n\n');
+                } else text = doc.body.innerText || raw.slice(0, 2000);
+            } else text = raw;
+        } else {
+            type = "DOC";
+            text = new DOMParser().parseFromString(raw, 'text/html').body.innerText || raw;
+        }
+        return { title, text: text.trim(), type, date };
+    }
+
+    // --- UTILS ---
+    function removeFile(id) {
+        sessionData = sessionData.filter(x => x.id !== id);
+        renderList();
+        if(sessionData.length === 0) {
+            document.getElementById('metricsBar').classList.add('hidden');
+            document.getElementById('safetyPanel').classList.add('hidden');
+            document.getElementById('footer').classList.add('hidden');
+        }
+    }
+
+    function clearAll() {
+        if(confirm('Clear all files?')) {
+            sessionData = [];
+            renderList();
+            document.getElementById('metricsBar').classList.add('hidden');
+            document.getElementById('safetyPanel').classList.add('hidden');
+            document.getElementById('footer').classList.add('hidden');
+        }
+    }
+
+    function renameFile(id) {
+        currentEditId = id;
+        const f = sessionData.find(x => x.id === id);
+        document.getElementById('editNameInput').value = f.name;
+        document.getElementById('editorText').value = f.content;
+        document.getElementById('editorOverlay').style.display = 'flex';
+    }
+    function saveEditor() {
+        const f = sessionData.find(x => x.id === currentEditId);
+        if(f) {
+            f.name = document.getElementById('editNameInput').value;
+            f.content = document.getElementById('editorText').value;
+            f.tokens = Math.ceil(f.content.length/4);
+            applySort(); 
+            renderList();
+        }
+        closeEditor();
+    }
+    function closeEditor() { document.getElementById('editorOverlay').style.display = 'none'; }
+
+    function readFile(file) {
+        return new Promise(r => {
+            const reader = new FileReader();
+            reader.onload = e => r(e.target.result);
+            reader.readAsText(file);
+        });
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    async function downloadBundle(mode) {
+        // ONLY GET ACTIVE FILES
+        const active = sessionData.filter(x => x.active);
+        
+        if(!active.length) return alert('No files selected!');
+        
+        // --- SMART FILENAME LOGIC (V3.7) ---
+        // Clean the first filename to be safe for saving
+        const firstCleanName = active[0].name.replace(/[^a-z0-9_\-]/gi, '').substring(0, 30);
+        const othersCount = active.length - 1;
+        
+        let filename = firstCleanName;
+        if (othersCount > 0) {
+            filename += `_plus_${othersCount}_others`;
+        }
+        // Append mode
+        filename += `_${mode.toUpperCase()}`;
+
+        showToast('Building file...');
+
+        if(mode === 'pdf') {
+            if(!window.jspdf) return alert('Internet required for PDF');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFont("courier"); doc.setFontSize(10);
+            
+            let y = 15;
+            active.forEach((f, i) => {
+                doc.setFont(undefined, 'bold');
+                doc.text(`FILE ${i+1}: ${f.name} [${f.type}]`, 15, y);
+                y+=7;
+                doc.setFont(undefined, 'normal');
+                doc.splitTextToSize(f.content, 180).forEach(l => {
+                    if(y>280) { doc.addPage(); y=15; }
+                    doc.text(l, 15, y); y+=5;
+                });
+                y+=10; if(y>280) { doc.addPage(); y=15; }
+            });
+            doc.save(`${filename}.pdf`);
+        } else {
+            let txt = "";
+            if(mode === 'rag') {
+                txt = active.map(f => 
+`<source_document>
+<meta><title>${f.name}</title><type>${f.type}</type><date>${f.date}</date></meta>
+<content>${f.content}</content>
+</source_document>`).join('\n');
+            } else {
+                txt = active.map(f => `=== FILE: ${f.name} ===\n\n${f.content}`).join('\n\n');
+            }
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([txt], {type:'text/plain'}));
+            a.download = `${filename}.txt`;
+            a.click();
+        }
+        showToast('Download Started');
+    }
+</script>
+</body>
+</html>

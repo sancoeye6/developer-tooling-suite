@@ -1,57 +1,87 @@
-# Regex Studio v3.7 — Intelligent Data Parsing Engine
+# Regex Studio | Structured Data Extraction Engine
 
-Regex Studio is a specialized offline ETL tool designed to clean, normalize, and structure unstructured HTML, MHTML, and text data for ingestion into analysis systems and Retrieval-Augmented Generation (RAG) pipelines.
+**Offline ETL Processor for Cleaning and Structuring Unstructured Web Data**  
+Single-File • Zero Backend • RAG-Optimized • Privacy-First
 
-It transforms messy exported content such as AI chats, LinkedIn feeds, and saved webpages into structured, machine-readable datasets.
-
----
-
-## Purpose
-
-Modern data sources often contain UI clutter, formatting noise, or embedded markup that makes them unsuitable for analysis or AI ingestion.
-
-Regex Studio solves this by:
-
-- Detecting source type automatically
-- Extracting semantic content only
-- Normalizing structure
-- Preparing clean datasets for downstream systems
+![Type](https://img.shields.io/badge/type-offline--etl-blue)
+![Architecture](https://img.shields.io/badge/architecture-client--side-green)
+![Dependencies](https://img.shields.io/badge/dependencies-none-orange)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ---
 
-## Core Capabilities
+## 🎯 What It Does
+
+Regex Studio is a specialized offline ETL engine that transforms messy exported content into clean, structured, machine-readable datasets ready for analysis or AI ingestion.
+
+It processes sources like:
+- AI chat exports  
+- LinkedIn pages  
+- Saved websites  
+- Raw HTML dumps  
+- MHTML archives  
+
+The system extracts **semantic content only** and removes UI clutter, formatting noise, and markup artifacts.
+
+---
+
+## 🧩 The Problem It Solves
+
+Modern exported data is rarely analysis-ready. It often contains:
+
+- UI buttons
+- navigation elements
+- styling markup
+- embedded scripts
+- tracking tags
+- formatting junk
+
+These make datasets unusable for:
+
+- analytics
+- automation
+- LLM ingestion
+- RAG pipelines
+
+Regex Studio converts noisy exports into structured datasets instantly.
+
+---
+
+## ⚙ Core Capabilities
 
 ### Smart Source Detection
-Identifies content origin using pattern fingerprinting:
-- LinkedIn HTML exports
+Automatically fingerprints files to determine origin type:
+
+- LinkedIn exports
 - AI chat logs
+- HTML pages
 - MHTML archives
-- Raw HTML dumps
+- generic raw dumps
 
 ---
 
 ### Intelligent Parsing Engine
-Instead of basic text stripping, Regex Studio:
+Instead of basic text stripping, the engine:
 
-- Builds a virtual DOM
-- Queries semantic elements
-- Falls back to regex extraction if needed
-- Removes UI artifacts automatically
+- builds a virtual DOM
+- queries semantic nodes
+- extracts meaningful text
+- removes UI artifacts
+- falls back to regex extraction when DOM parsing fails
 
 ---
 
 ### AI Conversation Normalization
-Standardizes different providers into a single format:
+Converts multiple AI formats into a unified schema:
 
-USER: text...
-
-ASSISTANT: text...
+USER: message ASSISTANT: response
 
 Supports parsing formats from:
+
 - ChatGPT
 - Claude
 - Gemini
-- Generic HTML chat exports
+- generic chat HTML exports
 
 ---
 
@@ -60,43 +90,43 @@ All detected code blocks are wrapped safely:
 
 [CODE] your code [/CODE]
 
-This ensures code survives ingestion into downstream tools.
+This guarantees code survives ingestion into downstream systems.
 
 ---
 
 ### Safety Panel (Token Monitoring)
-Estimates token size and displays safety indicators for major LLM context windows.
 
-Approximation:
+Provides real-time token estimation:
 
-tokens ≈ characters / 4
+tokens ≈ characters ÷ 4
 
-Threshold indicators:
-- GPT safe zone
-- Claude safe zone
-- Gemini safe zone
+Displays safety indicators for:
+
+- GPT context windows
+- Claude limits
+- Gemini limits
+
+Helps prevent dataset overflow during AI ingestion.
 
 ---
 
 ### RAG Export Mode
-Exports structured documents formatted for AI ingestion:
 
-<source_document> <meta>
+Exports structured documents optimized for AI ingestion:
+
+<source_document>
 
 <title>filename</title>
 <type>SOURCE_TYPE</type>
 <date>YYYY-MM-DD</date>
-</meta>
-<content>
-clean text
-</content>
+<content>clean text</content>
 </source_document>
-```This guarantees multi-document uploads remain logically separated when processed.
+```This ensures multi-document uploads remain logically separated inside vector or RAG systems.
 
 
 ---
 
-Workflow
+🔄 Workflow
 
 1. Save webpage or chat as HTML or MHTML
 
@@ -104,26 +134,29 @@ Workflow
 2. Drag file into Regex Studio
 
 
-3. System parses + cleans content
+3. Engine detects format automatically
 
 
-4. Review or edit text
+4. Content is parsed and cleaned
 
 
-5. Export structured dataset
+5. User reviews or edits text
+
+
+6. Export structured dataset
 
 
 
 
 ---
 
-Architecture
+🧠 Architecture
 
-Design Philosophy: Freeze Logic Architecture
+Design Philosophy: Freeze-Logic Architecture
 
 Meaning:
 
-fully client-side
+fully client-side processing
 
 no backend
 
@@ -131,19 +164,19 @@ no uploads
 
 runs offline
 
-zero dependencies (optional PDF library only)
+portable single file
 
 
 
 ---
 
-Tech Stack
-
-Vanilla JavaScript
+🛠 Tech Stack
 
 HTML5
 
 CSS3
+
+Vanilla JavaScript
 
 DOMParser API
 
@@ -151,47 +184,51 @@ FileReader API
 
 Regex Engine
 
-jsPDF (optional export)
+jsPDF (optional export module)
 
 
 
 ---
 
-Performance Characteristics
+⚡ Performance Characteristics
 
-Instant parsing
+instant parsing
 
-Handles very large documents
+handles large documents
 
-Memory-efficient
+memory efficient
 
-No installation required
+zero install
 
-Runs in restricted environments
+works in restricted environments
 
-
-
----
-
-Use Cases
-
-Preparing datasets for RAG pipelines
-
-Cleaning exported chat logs
-
-Structuring scraped content
-
-Removing markup noise
-
-Dataset preprocessing for analysis
+runs on low-spec machines
 
 
 
 ---
 
-Security
+🧪 Use Cases
 
-All processing occurs locally in the browser.
+preparing datasets for RAG pipelines
+
+cleaning exported chat logs
+
+structuring scraped content
+
+preprocessing datasets for analysis
+
+removing markup noise
+
+archiving conversations
+
+
+
+---
+
+🔒 Security
+
+All processing happens locally in the browser.
 
 No data is:
 
@@ -207,16 +244,15 @@ tracked
 
 ---
 
-License
+📄 License
 
-MIT License
+MIT License — free to use, modify, and distribute.
 
 
 ---
 
-Summary
+🧾 Summary
 
 Regex Studio is not a regex tester.
 
-It is a structured data extraction engine disguised as a lightweight web app.
-
+It is a structured data extraction engine disguised as a lightweight web application.
